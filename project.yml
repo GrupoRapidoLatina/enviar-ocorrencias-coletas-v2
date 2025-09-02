@@ -6,7 +6,3 @@ packages:
         main: "dist/index.js"
         runtime: nodejs:18
         web: true
-        files:
-        - dist/**
-        - package.json
-        - package-lock.json
