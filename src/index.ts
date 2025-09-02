@@ -50,5 +50,3 @@ export async function main(..._args: any[]) {
 		body: result,
 	};
 }
-
-main();
