@@ -2,3 +2,5 @@
 src/
 *.md
 *.log
+node_modules
+.env
