@@ -1,0 +1,28 @@
+name: Deploy DigitalOcean Function
+
+on:
+  push:
+    branches:
+      - main   # ou o branch que você usa para deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: Instalar plugin serverless
+        run: doctl serverless install
+
+      - name: Conectar namespace (se ainda não fez no local)
+        run: doctl serverless ${{ secretes.DO_FUNC_NAMESPACE }}
+
+      - name: Deploy para DigitalOcean Functions
+        run: doctl serverless deploy . --verbose
