@@ -1,0 +1,13 @@
+[
+  {
+    "apihost": "https://faas-nyc1-2ef2e6cc.doserverless.co",
+    "namespace": "fn-4a3dd7b6-a42f-47bb-a11f-692d888bc14b",
+    "packageVersions": {
+      "toutbox-reversa-v2": {
+        "version": "0.0.5",
+        "digest": "f6a1452e83b0e69b134dc3897b0fe04d1866901d48f8f1cd2096b234498d1fa7"
+      }
+    },
+    "actionVersions": {}
+  }
+]

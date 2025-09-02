@@ -7,7 +7,6 @@ import type { SendOccurrenceCommand } from "./command/sendOccurrence.command";
 import type { IScheduleResponse } from "./interfaces/scheduleResponse.interface";
 import type { ISendEquipmentResponse } from "./interfaces/sendEquipmentResponse.interface";
 import type { ISendOccurrenceResponse } from "./interfaces/sendOccurrenceResponse.interface";
-import { generateUid } from "../../../@shared/utils/generators/uid";
 
 export class ToutboxService {
 	private API_KEYS = {

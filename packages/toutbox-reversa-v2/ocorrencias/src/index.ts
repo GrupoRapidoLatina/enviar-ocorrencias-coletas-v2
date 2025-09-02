@@ -47,6 +47,13 @@ export async function main(..._args: any[]) {
 		`Execution finished, took ${millisecondsDuration} milliseconds or ${secondsDuration} seconds or ${minutesDuration} minutes`,
 	);
 	return {
-		body: result,
+		statusCode: 200,
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			success: true,
+			data: result
+		})
 	};
 }
