@@ -25,4 +25,4 @@ jobs:
         run: doctl serverless connect ${{ secrets.DO_FUNC_NAMESPACE }}
 
       - name: Deploy para DigitalOcean Functions
-        run: doctl serverless deploy . --verbose
+        run: doctl serverless deploy . --verbose --remote-build
