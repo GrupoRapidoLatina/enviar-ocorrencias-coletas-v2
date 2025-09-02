@@ -1,5 +1,4 @@
 # Ignora código fonte, dependências e arquivos pesados
 src/
-node_modules/
 *.md
 *.log
