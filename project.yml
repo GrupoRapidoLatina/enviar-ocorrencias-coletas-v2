@@ -3,6 +3,10 @@ packages:
   - name: toutbox-reversa-v2
     functions:
       - name: ocorrencias
-        main: ""
+        main: "dist/index.js"
         runtime: nodejs:18
         web: true
+        files:
+        - dist/**
+        - package.json
+        - package-lock.json
