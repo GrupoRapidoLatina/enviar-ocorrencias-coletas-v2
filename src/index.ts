@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import { ENV } from "./@constants/env";
 import { connection } from "./@external/orm/drizzle";
 import { CitiesService } from "./@shared/services/cities/cities.service";
@@ -39,7 +38,6 @@ export async function main(..._args: any[]) {
 	const result = await usecase.execute();
 	console.log(result?.length);
 	const endTime = Date.now();
-	fs.writeFileSync(`result-${endTime}.json`, JSON.stringify(result, null, 2));
 	await connection.end();
 
 	const millisecondsDuration = endTime - startTime;
