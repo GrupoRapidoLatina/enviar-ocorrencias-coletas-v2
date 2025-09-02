@@ -1,0 +1,30 @@
+{
+  "name": "ocorrencias_reversa_v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rimraf dist && esbuild src/index.ts --bundle --format=esm --platform=node --target=node18 --packages=external --outfile=dist/index.js",
+    "start": "node dist/index.js",
+    "dev": "tsx --watch src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "2.2.2",
+    "@types/node": "^24.3.0",
+    "drizzle-kit": "^0.31.4",
+    "esbuild": "^0.25.9",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.4",
+    "mysql2": "^3.14.3"
+  }
+}
