@@ -22,7 +22,7 @@ jobs:
         run: doctl serverless install
 
       - name: Conectar namespace (se ainda não fez no local)
-        run: doctl serverless ${{ secrets.DO_FUNC_NAMESPACE }}
+        run: doctl serverless connect ${{ secrets.DO_FUNC_NAMESPACE }}
 
       - name: Deploy para DigitalOcean Functions
         run: doctl serverless deploy . --verbose
