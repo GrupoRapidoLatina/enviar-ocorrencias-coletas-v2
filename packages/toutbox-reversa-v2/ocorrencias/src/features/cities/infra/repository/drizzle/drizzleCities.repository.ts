@@ -1,10 +1,9 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../../../../@external/orm/drizzle";
 import { citiesSchema } from "../../../../../@external/orm/drizzle/schemas";
 import type { ICitiesRepository } from "../../../domain/contracts/cities.repository.interface";
 
 export class DrizzleCitiesRepository implements ICitiesRepository {
-	private drizzle = db;
+	constructor(private readonly drizzle: any) {}
 	async getCitySla(city: string): Promise<number> {
 		const result = await this.drizzle
 			.select()

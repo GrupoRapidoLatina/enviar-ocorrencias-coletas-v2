@@ -7,31 +7,17 @@ import type { SendOccurrenceCommand } from "./command/sendOccurrence.command";
 import type { IScheduleResponse } from "./interfaces/scheduleResponse.interface";
 import type { ISendEquipmentResponse } from "./interfaces/sendEquipmentResponse.interface";
 import type { ISendOccurrenceResponse } from "./interfaces/sendOccurrenceResponse.interface";
+import type { IToutboxService } from "./interfaces/toutbox.service.interface";
 
-export class ToutboxService {
-	private API_KEYS = {
-		"VIVO B2C": ENV.TOUTBOX_B2C_API_KEY,
-		"VIVO B2B": ENV.TOUTBOX_B2B_API_KEY,
-	};
-	private apiKey: string;
-	constructor(private readonly httpService: IHttpService) {}
-
-	public setApiKey(operation: string) {
-		this.apiKey = this.API_KEYS[operation];
-	}
-
-	private validateApiKey() {
-		if (!this.apiKey) {
-			throw new Error("You should define an API key, use `setApiKey` method");
-		}
-	}
+export class ToutboxB2CService implements IToutboxService {
+	private apiKey: string = ENV.TOUTBOX_B2C_API_KEY;
+	constructor(private readonly httpService: IHttpService) { }
 
 	async sendOccurrence({
 		setFile: _setFile,
 		dataForLog,
 		...occurrence
 	}: SendOccurrenceCommand) {
-		this.validateApiKey();
 		const response = await this.httpService.post<
 			Omit<SendOccurrenceCommand, "setFile" | "dataForLog">,
 			ISendOccurrenceResponse
@@ -49,7 +35,6 @@ export class ToutboxService {
 	}
 
 	async scheduleOrder(command: ScheduleOrderCommand, orderId: string) {
-		this.validateApiKey();
 		const response = await this.httpService.post<
 			Omit<ScheduleOrderCommand, "dataForLog">,
 			IScheduleResponse
@@ -63,7 +48,6 @@ export class ToutboxService {
 	}
 
 	async sendEquipments(command: SendEquipmentsCommand) {
-		this.validateApiKey();
 		const response = await this.httpService.put<
 			Omit<SendEquipmentsCommand, "dataForLog">,
 			ISendEquipmentResponse
@@ -84,7 +68,6 @@ export class ToutboxService {
 		command: SendCollectedEquipmentsCommand,
 		orderId: string,
 	) {
-		this.validateApiKey();
 		const response = await this.httpService.put<
 			Omit<SendCollectedEquipmentsCommand, "dataForLog">,
 			ISendEquipmentResponse

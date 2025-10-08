@@ -4,6 +4,7 @@ interface IProduct {
 	productCode: string;
 	serialNumber: string;
 	collected: boolean;
+	quantity: number;
 }
 
 export class SendEquipmentsCommand {

@@ -4,3 +4,6 @@ node_modules
 .env
 result-*.json
 result.json
+*.zip
+REVIEW*
+lib

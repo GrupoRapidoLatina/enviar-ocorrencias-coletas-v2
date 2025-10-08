@@ -2,10 +2,10 @@
   "name": "ocorrencias_reversa_v2",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "rimraf dist && esbuild src/index.ts --bundle --format=esm --platform=node --target=node18 --external:fs --external:path --external:dotenv --outfile=dist/index.js",
-    "start": "node dist/index.js",
+    "build": "rimraf lib && esbuild src/index.ts --bundle --format=esm --platform=node --target=node18 --packages=external --outfile=lib/index.js && rimraf node_modules && yarn install --production",
+    "start": "node lib/index.js",
     "dev": "tsx --watch src/index.ts",
     "deploy": "doctl serverless deploy . --env .env"
   },
@@ -17,7 +17,6 @@
     "@biomejs/biome": "2.2.2",
     "@types/node": "^24.3.0",
     "drizzle-kit": "^0.31.4",
-    "esbuild": "^0.25.9",
     "rimraf": "^6.0.1",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
@@ -26,6 +25,7 @@
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.4",
+    "esbuild": "^0.25.9",
     "mysql2": "^3.14.3"
   }
 }

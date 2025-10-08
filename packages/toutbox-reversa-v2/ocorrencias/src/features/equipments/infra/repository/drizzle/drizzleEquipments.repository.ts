@@ -1,11 +1,10 @@
 import { and, eq } from "drizzle-orm";
-import { db } from "../../../../../@external/orm/drizzle";
 import { equipmentsSchema } from "../../../../../@external/orm/drizzle/schemas";
 import type { IEquipmentsRepository } from "../../../domain/contracts/repository/equipments.repository.interface";
 import { Equipment } from "../../../domain/model/equipment";
 
 export class DrizzleEquipmentsRepository implements IEquipmentsRepository {
-	private drizzle = db;
+	constructor(private readonly drizzle: any) {}
 
 	async listProdutiveOrderEquipments(orderId: string) {
 		const result = await this.drizzle

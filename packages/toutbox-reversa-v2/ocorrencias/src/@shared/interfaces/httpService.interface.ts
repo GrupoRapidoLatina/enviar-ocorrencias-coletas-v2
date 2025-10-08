@@ -6,13 +6,24 @@ export interface IResponse<T = unknown> {
 }
 
 export interface IRequestConfig {
-	headers?: Record<string, string>;
-	timeout?: number;
+  headers?: Record<string, string>;
+  timeout?: number;
 }
 
 export interface IHttpService {
-	get(url: string, config?: IRequestConfig): Promise<IResponse>;
-	post<RequestBody, ResponseBody>(url: string, data: RequestBody, config?: IRequestConfig): Promise<IResponse<ResponseBody>>;
-	put<RequestBody, ResponseBody>(url: string, data: RequestBody, config?: IRequestConfig): Promise<IResponse<ResponseBody>>;
-	delete(url: string, config?: IRequestConfig): Promise<IResponse>;
+  get<ResponseBody>(
+    url: string,
+    config?: IRequestConfig
+  ): Promise<IResponse<ResponseBody>>;
+  post<RequestBody, ResponseBody>(
+    url: string,
+    data: RequestBody,
+    config?: IRequestConfig
+  ): Promise<IResponse<ResponseBody>>;
+  put<RequestBody, ResponseBody>(
+    url: string,
+    data: RequestBody,
+    config?: IRequestConfig
+  ): Promise<IResponse<ResponseBody>>;
+  delete(url: string, config?: IRequestConfig): Promise<IResponse>;
 }

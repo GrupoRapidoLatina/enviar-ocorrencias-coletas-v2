@@ -3,6 +3,7 @@ packages:
   - name: toutbox-reversa-v2
     functions:
       - name: ocorrencias
-        main: "dist/index.js"
-        runtime: nodejs:18
+        main: ""
+        runtime: "nodejs:18"
         web: true
+        binary: false

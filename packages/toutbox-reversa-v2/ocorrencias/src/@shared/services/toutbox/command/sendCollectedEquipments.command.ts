@@ -1,5 +1,4 @@
 interface ICollectedProduct {
-	product_code: string;
 	serial_number: string;
 	collected: boolean;
 }

@@ -1,0 +1,9 @@
+lib
+node_modules/dotenv
+node_modules/axios
+node_modules/drizzle-orm
+node_modules/mysql2
+node_modules/lru.min
+node_modules/lru-cache
+package.json
+.env

@@ -1,5 +1,6 @@
 interface IEventsData {
-	orderId: string;
+	orderId?: string;
+	trackingNumber?: string;
 	CourierId: number;
 	events: IEvent[];
 }

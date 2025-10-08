@@ -1,6 +1,0 @@
-# Ignora código fonte, dependências e arquivos pesados
-src/
-*.md
-*.log
-node_modules
-.env

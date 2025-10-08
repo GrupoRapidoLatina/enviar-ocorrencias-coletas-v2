@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "es2020",
-    "esModuleInterop": true,
+    "target": "es2020",                // Suporte a async/await
+    "module": "esnext",              // CommonJS para Node/DigitalOcean
+    "moduleResolution": "node",        // Resolve módulos no estilo Node
+    "outDir": "lib",                  // Pasta de saída
+    "rootDir": "src",                  // Pasta raiz do código
+    "esModuleInterop": true,           // Permite imports compatíveis com CommonJS
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "outDir": "./dist"
+    "strict": false,                    // Ativa todas as checagens estritas
+    "skipLibCheck": true,              // Ignora checagem de libs externas
+    "resolveJsonModule": true,         // Permite importar JSON
+    "noUnusedLocals": true,            // Erros para variáveis não usadas
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["./*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src"],                  // Incluir todo o código-fonte
+  "exclude": ["node_modules", "dist"]  // Ignorar node_modules e dist
 }

@@ -8,4 +8,9 @@ export interface IOrderHistoryRepository {
 	insert: (data: IInsertOrderHistoryCommand) => Promise<OrderHistory | null>;
 	syncLog: (_id: number, id_historico: string) => Promise<boolean>;
 	findProdutiveOccurrence: (order_id: string) => Promise<OrderHistory[]>;
+	findByCodigoTelefonica: (
+		order_id: string,
+		codigo_telefonica: number
+	) => Promise<OrderHistory | null>;
+	increaseRetryCount: (id: number) => Promise<boolean>;
 }
