@@ -4,6 +4,6 @@ node_modules/axios
 node_modules/drizzle-orm
 node_modules/mysql2
 node_modules/lru.min
-node_modules/lru-cache
+node_modules/sql-escaper
 package.json
 .env

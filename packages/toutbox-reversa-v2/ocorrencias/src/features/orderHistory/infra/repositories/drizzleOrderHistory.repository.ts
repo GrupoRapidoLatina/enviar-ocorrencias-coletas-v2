@@ -50,10 +50,19 @@ export class DrizzleOrderHistoryRepository implements IOrderHistoryRepository {
           sigla: schemas.operationsSchema.sigla,
           imagem: sql<string>`
             CASE
-              WHEN LENGTH(${schemas.orderHistorySchema.foto_id}) > 0 THEN
-                CONCAT('https://rapidocoletas.com.br/v1/storage/buckets/padrao/files/', ${schemas.orderHistorySchema.foto_id}, '/view{qp}project=rapido-coletas') 
-              ELSE 
-                NULL 
+              WHEN ${schemas.orderHistorySchema.foto_id} IS NULL 
+                OR ${schemas.orderHistorySchema.foto_id} = '' THEN NULL
+              WHEN ${schemas.orderHistorySchema.foto_id} LIKE 'whatsapp/%'
+                OR ${schemas.orderHistorySchema.foto_id} LIKE 'ordens/%' 
+                THEN CONCAT(
+                  'https://armazenamento-reversa.nyc3.digitaloceanspaces.com/',
+                  ${schemas.orderHistorySchema.foto_id}
+                )
+              ELSE CONCAT(
+                'https://rapidocoletas.com.br/v1/storage/buckets/padrao/files/',
+                ${schemas.orderHistorySchema.foto_id},
+                '/view{qp}project=rapido-coletas'
+              )
             END
           `.as("imagem"),
           ex: sql<string>`
@@ -97,10 +106,19 @@ export class DrizzleOrderHistoryRepository implements IOrderHistoryRepository {
             inArray(schemas.operationsSchema._uid, [
               "630fd72b864eb4979c74",
               "6893a710319046d1dd25",
+            ]),
+            inArray(schemas.orderHistorySchema.numero_ba, [
+              'RET13_418587_21606182_CN',
+              'RET13_415907 _21608450 _CN',
+              'RET13_415908 _21597172 _CN',
+              'RET13_418466_21658230_CN',
             ])
           )
         )
-        .groupBy(schemas.orderHistorySchema._id)
+        .groupBy(
+          schemas.orderHistorySchema.codigo_telefonica,
+          schemas.orderHistorySchema.numero_ba
+        )
         .orderBy(schemas.orderHistorySchema._id)
         .limit(limit);
 

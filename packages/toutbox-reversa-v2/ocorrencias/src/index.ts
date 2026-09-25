@@ -15,6 +15,9 @@ import { DeliveryDateCalculatorService } from "./features/orderHistory/domain/se
 import { SendOrderHistoryUsecase } from "./features/orderHistory/domain/usecase/sendOrderHistory.usecase";
 import { DrizzleOrderHistoryRepository } from "./features/orderHistory/infra/repositories/drizzleOrderHistory.repository";
 import { PreListaPostagemService } from "./@shared/services/preListaPostagem/preListaPostagem.service";
+import { DrizzlePreListaPostagemRepository } from "./features/preListaPostagem/infra/repository/drizzlePreListaPostagem.repository";
+import { DrizzlePreListaPostagemProdutosRepository } from "./features/preListaPostagem/infra/repository/drizzlePreListaPostagemProdutos.repository";
+import { DeclineOrderUsecase } from "./features/preListaPostagem/domain/usecase/declineOrder.usecase";
 
 // biome-ignore lint/suspicious/noExplicitAny: true
 export async function main(_args: any) {
@@ -24,25 +27,35 @@ export async function main(_args: any) {
   const drizzleHistoryLogsRepository = new DrizzleHistoryLogsRepository(db);
   const drizzleCitiesRepository = new DrizzleCitiesRepository(db);
   const drizzleEquipmentsLogsRepository = new DrizzleEquipmentsLogsRepository(
-    db
+    db,
   );
   const historyLogsService = new HistoryLogsService(
-    drizzleHistoryLogsRepository
+    drizzleHistoryLogsRepository,
   );
 
   const axiosHttpService = new AxiosHttpService(ENV.TOUTBOX_BASE_URL ?? "");
-  const coletasAxiosHttpService = new AxiosHttpService(ENV.COLETAS_API_URL ?? "");
-  const preListaPostagemService = new PreListaPostagemService(coletasAxiosHttpService);
+  const coletasAxiosHttpService = new AxiosHttpService(
+    ENV.COLETAS_API_URL ?? "",
+  );
+
+  const preListaPostagemRepository = new DrizzlePreListaPostagemRepository(db);
+  const preListaPostagemProdutosRepository =
+    new DrizzlePreListaPostagemProdutosRepository(db);
+  const preListaPostagemService = new PreListaPostagemService(
+    preListaPostagemRepository,
+    preListaPostagemProdutosRepository,
+    coletasAxiosHttpService,
+  );
   const toutboxStrategy = {
     "VIVO B2B": new ToutboxB2BService(axiosHttpService),
     "VIVO B2C": new ToutboxB2CService(axiosHttpService),
-  }
+  };
 
-  const usecase = new SendOrderHistoryUsecase(
+  const sendOrderHistoryUsecase = new SendOrderHistoryUsecase(
     drizzleOrderHistoryRepository,
     historyLogsService,
     new DeliveryDateCalculatorService(
-      new CitiesService(drizzleCitiesRepository)
+      new CitiesService(drizzleCitiesRepository),
     ),
     new EquipmentsService(new DrizzleEquipmentsRepository(db)),
     new EquipmentsLogsService(drizzleEquipmentsLogsRepository),
@@ -50,7 +63,21 @@ export async function main(_args: any) {
     preListaPostagemService,
   );
 
-  const result = await usecase.execute();
+  const declineOrderUsecase = new DeclineOrderUsecase(
+    preListaPostagemRepository,
+    historyLogsService,
+    toutboxStrategy,
+    preListaPostagemService,
+  );
+
+  const sendOrderHistoryResult = await sendOrderHistoryUsecase.execute();
+  const declineOrderResult = await declineOrderUsecase.execute();
+
+  const result = {
+    sendOrderHistoryResult,
+    declineOrderResult,
+  };
+
   const endTime = Date.now();
   await closeDB();
 
@@ -70,3 +97,6 @@ export async function main(_args: any) {
     }),
   };
 }
+
+
+main([]);

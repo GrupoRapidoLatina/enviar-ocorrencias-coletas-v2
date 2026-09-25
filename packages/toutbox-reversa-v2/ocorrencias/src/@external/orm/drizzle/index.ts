@@ -5,6 +5,7 @@ import * as schema from "./schemas";
 
 let connection: Connection | null = null;
 let dbInstance: any = null;
+export type TDrizzle = ReturnType<typeof drizzle>;
 
 export async function getDB() {
   if (!connection) {

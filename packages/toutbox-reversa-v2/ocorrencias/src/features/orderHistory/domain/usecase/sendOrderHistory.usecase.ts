@@ -41,7 +41,7 @@ export class SendOrderHistoryUsecase {
     private readonly equipmentsService: IEquipmentsService,
     private readonly equipmentsLogsService: EquipmentsLogsService,
     private readonly toutboxServiceStrategy: IToutboxServiceStrategy,
-    private readonly preListaPostagemService: PreListaPostagemService
+    private readonly preListaPostagemService: PreListaPostagemService,
   ) {}
 
   async execute() {
@@ -49,6 +49,8 @@ export class SendOrderHistoryUsecase {
     // fetch latest occurrences
     const occurrences =
       await this.orderHistoryRepository.listLatestOrdersHistories();
+
+      console.log({ occurrences });
     let counter = 0;
     for (const occurrence of occurrences) {
       counter++;
@@ -62,7 +64,7 @@ export class SendOrderHistoryUsecase {
 
       if (!this.toutboxService) {
         response.push(
-          `Não foi possível definir a operação da ocorrência: ${occurrence._id}`
+          `Não foi possível definir a operação da ocorrência: ${occurrence._id}`,
         );
         await this.insertOccurrenceLog({
           _uid: generateUid(),
@@ -90,22 +92,21 @@ export class SendOrderHistoryUsecase {
         response.push(`Ocorrência: ${occurrence._id} já enviada`);
         await this.orderHistoryRepository.syncLog(
           occurrence._id ?? 0,
-          checkOccurrence.oldOccurrenceId
+          checkOccurrence.oldOccurrenceId,
         );
         continue;
       }
 
       const occurrencesReponses: any[] = [];
       const occurenceDateTime = formatMsToDateTime(
-        occurrence.data_criacao || 0
+        occurrence.data_criacao || 0,
       );
 
       const convertedOccurrenceCode = Number(`${occurrence.codigo_telefonica}`);
       let forceProdutiveOccurrence: boolean = false;
       if (convertedOccurrenceCode === TOUTBOX_OCCURRENCES_MAPPING.COLETADO) {
-        forceProdutiveOccurrence = await this.needToForceProdutiveOccurrence(
-          occurrence
-        );
+        forceProdutiveOccurrence =
+          await this.needToForceProdutiveOccurrence(occurrence);
       }
 
       if (
@@ -113,73 +114,6 @@ export class SendOrderHistoryUsecase {
           TOUTBOX_OCCURRENCES_MAPPING.BAIXA_PRODUTIVA ||
         forceProdutiveOccurrence
       ) {
-        const haveCollectedOccurrence =
-          await this.haveCollectedOccurrence(occurrence);
-
-        if (!haveCollectedOccurrence) {
-          const ID_COLECTED_OCCURRENCE = "65141a70b3bcf59f7eb1";
-          const STATUS_COLECTED_OCCURRENCE = 4;
-          const HISTORY_DESCRIPTION =
-            "Ocorrência de coleta lançada automaticamente ao baixar produtivo";
-          const result = await this.orderHistoryRepository.insert({
-            _createdAt: new Date(),
-            _permissions: "[]",
-            data_criacao: Date.now(),
-            codigo_telefonica: `${TOUTBOX_OCCURRENCES_MAPPING.COLETADO}`,
-            _uid: generateUid(),
-            _updatedAt: new Date(),
-            data_agendamento: null,
-            data_agendamento_fim: null,
-            descricao: HISTORY_DESCRIPTION,
-            familia_equipamento_id: null,
-            foto_id: "",
-            id_sinc: "",
-            latitude: null,
-            longitude: null,
-            numero_ba: occurrence.numero_ba,
-            ordem_servico_id: occurrence.ordem_servico_id,
-            ordem_servico_item_id: occurrence.ordem_servico_item_id,
-            parceiro_id: null,
-            parceiro_nome: "TOUTBOX",
-            resinc: 0,
-            status: STATUS_COLECTED_OCCURRENCE,
-            tipo_ocorrencia_id: ID_COLECTED_OCCURRENCE,
-            usuario_id: null,
-            usuario_nome: "TOUTBOX",
-          });
-          const sendOccurrenceCommand = new SendOccurrenceCommand(
-            {
-              orderId: occurrence.numero_ba ?? "",
-              events: [
-                {
-                  eventCode: `${TOUTBOX_OCCURRENCES_MAPPING.COLETADO}`,
-                  description: `COLETADO NO CLIENTE`,
-                  date: formatMsToDateTime(Date.now()),
-                  address: `${occurrence.logradouro}, ${occurrence.bairro}`,
-                  number: `${occurrence.numero}`,
-                  city: `${occurrence.cidade}`,
-                  state: `${occurrence.uf}`,
-                  geo: {
-                    lat: parseFloat(`${occurrence.latitude}`) ?? 0,
-                    long: parseFloat(`${occurrence.longitude}`) ?? 0,
-                  },
-                },
-              ],
-            },
-            {
-              id_historico: result._id ?? 0,
-              id_ordem: `${occurrence.ordem_servico_id}`,
-            }
-          );
-
-          const resultForceColectedOccurrence = await this.sendOccurrence(
-            sendOccurrenceCommand,
-            result._id ?? 0
-          );
-
-          response.push(resultForceColectedOccurrence);
-        }
-
         const equipmentsSended = await this.sendOrderEquipments(occurrence);
 
         occurrencesReponses.push(equipmentsSended);
@@ -187,7 +121,7 @@ export class SendOrderHistoryUsecase {
         if (
           equipmentsSended.some(
             (item) =>
-              typeof item.data === "string" && item.data.includes("timeout")
+              typeof item.data === "string" && item.data.includes("timeout"),
           )
         ) {
           response.push(occurrencesReponses);
@@ -196,7 +130,10 @@ export class SendOrderHistoryUsecase {
         }
       }
 
-      if (this.needSchedule(convertedOccurrenceCode)) {
+      if (
+        this.needSchedule(convertedOccurrenceCode) &&
+        this.operation === "VIVO B2C"
+      ) {
         const orderScheduled = await this.scheduleOrder(occurrence);
 
         occurrencesReponses.push(orderScheduled);
@@ -228,7 +165,7 @@ export class SendOrderHistoryUsecase {
         {
           id_historico: occurrence._id ?? 0,
           id_ordem: `${occurrence.ordem_servico_id}`,
-        }
+        },
       );
 
       if (occurrence.imagem) {
@@ -237,7 +174,7 @@ export class SendOrderHistoryUsecase {
 
       const result = await this.sendOccurrence(
         sendOccurrenceCommand,
-        occurrence._id ?? 0
+        occurrence._id ?? 0,
       );
 
       occurrencesReponses.push(result);
@@ -250,7 +187,7 @@ export class SendOrderHistoryUsecase {
   private async sendOrderEquipments(occurrence: LatestOrderHistory) {
     const equipments =
       await this.equipmentsService.listProdutiveOrderEquipments(
-        occurrence.ordem_servico_id ?? ""
+        occurrence.ordem_servico_id ?? "",
       );
     const equipmentsResponse: any[] = [];
     for (const equipment of equipments) {
@@ -261,7 +198,7 @@ export class SendOrderHistoryUsecase {
 
       const result = await this.toutboxService.sendCollectedEquipments(
         collectedCommand,
-        occurrence.numero_ba ?? ""
+        occurrence.numero_ba ?? "",
       );
       equipmentsResponse.push(result);
       await this.insertEquipmentLog({
@@ -278,18 +215,19 @@ export class SendOrderHistoryUsecase {
 
       if (result.data?.error) {
         const productNotFoundInToutbox = this.productNotFoundInToutbox(
-          result.data.error[0].messages
+          result.data.error[0].messages,
         );
         if (productNotFoundInToutbox) {
-          const getProductQuantity = await this.preListaPostagemService.getProductQuantity(
-            occurrence.numero_ba ?? "",
-            equipment.numero_serie ?? ""
-          );
+          const getProductQuantity =
+            await this.preListaPostagemService.getProductQuantity(
+              occurrence.numero_ba ?? "",
+              equipment.numero_serie ?? "",
+            );
 
           let equipmentQuantity = 1;
 
-          if (!getProductQuantity.error) {
-            equipmentQuantity = getProductQuantity.data.produto.quantidade ?? 1;
+          if (getProductQuantity) {
+            equipmentQuantity = getProductQuantity.quantidade ?? 1;
           }
 
           const sendEquipmentCommand = new SendEquipmentsCommand({
@@ -301,9 +239,8 @@ export class SendOrderHistoryUsecase {
             quantity: equipmentQuantity,
           });
 
-          const result = await this.toutboxService.sendEquipments(
-            sendEquipmentCommand
-          );
+          const result =
+            await this.toutboxService.sendEquipments(sendEquipmentCommand);
           await this.insertEquipmentLog({
             _uid: generateUid(),
             _createdAt: new Date(),
@@ -327,7 +264,7 @@ export class SendOrderHistoryUsecase {
     return errors.some(
       (error) =>
         error.includes("não possui produtos") ||
-        error.includes("Objeto não encontrado")
+        error.includes("Objeto não encontrado"),
     );
   }
 
@@ -340,15 +277,6 @@ export class SendOrderHistoryUsecase {
     }
   }
 
-  private async haveCollectedOccurrence(occurrence: LatestOrderHistory) {
-    const collectedOccurrence =
-      await this.orderHistoryRepository.findByCodigoTelefonica(
-        occurrence.numero_ba ?? "",
-        TOUTBOX_OCCURRENCES_MAPPING.COLETADO
-      );
-
-    return Boolean(collectedOccurrence);
-  }
   private async checkIfOccurrenceHasBeenSentInPastMinute({
     numero_ba,
     codigo_telefonica,
@@ -356,7 +284,7 @@ export class SendOrderHistoryUsecase {
   }: LatestOrderHistory) {
     const lastLog = await this.historyLogsService.getLogByNumeroBaAndStatus(
       numero_ba ?? "",
-      codigo_telefonica ?? ""
+      codigo_telefonica ?? "",
     );
 
     if (!lastLog?.data) {
@@ -400,7 +328,7 @@ export class SendOrderHistoryUsecase {
       if (CODIGO_TELEFONICA === TOUTBOX_OCCURRENCES_MAPPING.BAIXA_PRODUTIVA) {
         const { deliveryDate, period: deliveryPeriod } =
           await this.deliveryDateCalculatorService.calculate(
-            occurrence.cidade ?? ""
+            occurrence.cidade ?? "",
           );
 
         formattedScheduleDate = deliveryDate;
@@ -430,7 +358,7 @@ export class SendOrderHistoryUsecase {
 
       const result = await this.toutboxService.scheduleOrder(
         command,
-        occurrence.numero_ba ?? ""
+        occurrence.numero_ba ?? "",
       );
       await this.insertOccurrenceLog({
         _uid: generateUid(),
@@ -485,22 +413,22 @@ export class SendOrderHistoryUsecase {
       {
         id_historico: occurrence._id ?? 0,
         id_ordem: `${occurrence.ordem_servico_id}`,
-      }
+      },
     );
 
     await this.sendOccurrence(
       sendOccurrenceCommand,
       occurrence._id ?? 0,
-      false
+      false,
     );
   }
 
   private async needToForceProdutiveOccurrence(
-    occurrence: LatestOrderHistory
+    occurrence: LatestOrderHistory,
   ): Promise<boolean> {
     const alreadySent =
       await this.orderHistoryRepository.findProdutiveOccurrence(
-        occurrence.ordem_servico_id ?? ""
+        occurrence.ordem_servico_id ?? "",
       );
 
     if (!alreadySent) {
@@ -556,7 +484,7 @@ export class SendOrderHistoryUsecase {
         {
           id_historico: result._id ?? 0,
           id_ordem: `${occurrence.ordem_servico_id}`,
-        }
+        },
       );
 
       await this.sendOccurrence(sendOccurrenceCommand, result._id ?? 0);
@@ -567,16 +495,16 @@ export class SendOrderHistoryUsecase {
   private async sendOccurrence(
     command: SendOccurrenceCommand,
     occurrenceId: number,
-    syncLog: boolean = true
+    syncLog: boolean = true,
   ) {
     const { dataForLog, ...occurrence } = command;
 
     if (this.operation === "VIVO B2B") {
       const trackingNumber = await this.getTrackingNumber(
-        command.eventsData[0].orderId
+        command.eventsData[0].orderId,
       );
 
-      if (trackingNumber.error) {
+      if (!trackingNumber) {
         await this.insertOccurrenceLog({
           _uid: generateUid(),
           _createdAt: new Date(),
@@ -584,13 +512,13 @@ export class SendOrderHistoryUsecase {
           _permissions: "[]",
           data: new Date(),
           ex: 0,
-          endpoint: `coletas../endpoint/codigo_rastreio.php?codigoUnico=${command.eventsData[0].orderId}`,
+          endpoint: `interno`,
           id_ordem: dataForLog.id_ordem,
           numero_ba: occurrence.eventsData[0].orderId,
           id_usuario: "1",
           id_historico: String(dataForLog.id_historico),
           payload: JSON.stringify(occurrence),
-          response: JSON.stringify(trackingNumber?.data),
+          response: `Código rastreio não encontrado para o pedido ${command.eventsData[0].orderId}`,
           status: Number(occurrence.eventsData[0].events[0].eventCode),
           tentativas: 1,
         });
@@ -602,7 +530,7 @@ export class SendOrderHistoryUsecase {
         const { orderId, ...rest } = event;
         return {
           ...rest,
-          trackingNumber: trackingNumber.data.codigoRastreio,
+          trackingNumber: trackingNumber.codigoRastreio,
         };
       });
     }
@@ -653,9 +581,8 @@ export class SendOrderHistoryUsecase {
   }
 
   private async getTrackingNumber(orderId: string) {
-    const response = await this.preListaPostagemService.getTrackingNumber(
-      orderId
-    );
+    const response =
+      await this.preListaPostagemService.getTrackingNumber(orderId);
 
     return response;
   }

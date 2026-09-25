@@ -4,14 +4,14 @@
     "namespace": "fn-4a3dd7b6-a42f-47bb-a11f-692d888bc14b",
     "packageVersions": {
       "toutbox-reversa-v2": {
-        "version": "0.0.71",
+        "version": "0.0.88",
         "digest": "cf2a7fd4c8202c45a075236829c1ba8fbbcb2bb95c61c366ae7e65c3e27cd4b0"
       }
     },
     "actionVersions": {
       "toutbox-reversa-v2/ocorrencias": {
-        "version": "0.0.54",
-        "digest": "5165a4fc8c96aa8c70c0819e8f63b078113b619eca997ef29e3cd46d0ecfb16b"
+        "version": "0.0.68",
+        "digest": "0c01bc1bcb063a78be132bc4bf5e0fdab1cbc9ebb2b97be72a2af53c537c0b79"
       }
     }
   }
